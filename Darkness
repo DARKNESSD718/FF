@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>مكتبة التطبيقات</title>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+    }
+
+    header {
+      background-color: #3f51b5;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .search-bar {
+      text-align: center;
+      margin: 1rem;
+    }
+
+    .search-bar input {
+      padding: 0.5rem;
+      width: 80%;
+      max-width: 300px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    #apps-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .app-card {
+      background-color: white;
+      margin: 1rem;
+      padding: 1rem;
+      width: 250px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .app-card h3 {
+      margin: 0.5rem 0;
+    }
+
+    .app-card p {
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    .app-card a {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      background-color: #4caf50;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    .app-card .delete-btn {
+      margin-top: 0.5rem;
+      background-color: #e53935;
+      color: white;
+      border: none;
+      padding: 0.4rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+    }
+
+    #openFormBtn {
+      padding: 0.6rem 1.2rem;
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .form-content {
+      background-color: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    input[type="text"], input[type="url"], input[type="file"] {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .cancel-btn {
+      background-color: #f44336;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>مكتبة التطبيقات</h1>
+  </header>
+
+  <section class="search-bar">
+    <input type="text" id="searchInput" placeholder="ابحث عن تطبيق...">
+  </section>
+
+  <main id="apps-container">
+    <!-- التطبيقات ستظهر هنا -->
+  </main>
+
+  <footer>
+    <button id="openFormBtn">+ نشر تطبيق</button>
+  </footer>
+
+  <!-- نافذة نشر تطبيق -->
+  <div id="uploadForm" class="modal hidden">
+    <div class="form-content">
+      <h2>نشر تطبيق جديد</h2>
+      <input type="text" id="appName" placeholder="اسم التطبيق" required>
+      <input type="text" id="appDesc" placeholder="وصف مختصر">
+      <input type="url" id="appLink" placeholder="أو رابط التحميل (https://)">
+      <label>أو اختر ملف:</label>
+      <input type="file" id="appFile" accept=".apk,.zip,.rar">
+      <button onclick="addApp()">نشر</button>
+      <button id="closeFormBtn" class="cancel-btn">إلغاء</button>
+    </div>
+  </div>
+
+  <script>
+    const openFormBtn = document.getElementById("openFormBtn");
+    const closeFormBtn = document.getElementById("closeFormBtn");
+    const uploadForm = document.getElementById("uploadForm");
+    const appsContainer = document.getElementById("apps-container");
+    const searchInput = document.getElementById("searchInput");
+
+    openFormBtn.onclick = () => uploadForm.classList.remove("hidden");
+    closeFormBtn.onclick = () => uploadForm.classList.add("hidden");
+
+    function addApp() {
+      const name = document.getElementById("appName").value;
+      const desc = document.getElementById("appDesc").value;
+      const link = document.getElementById("appLink").value;
+      const file = document.getElementById("appFile").files[0];
+
+      if (!name || (!link && !file)) {
+        alert("يرجى إدخال اسم التطبيق ورابط أو ملف.");
+        return;
+      }
+
+      const appCard = document.createElement("div");
+      appCard.className = "app-card";
+
+      let downloadLink = "";
+      if (link) {
+        downloadLink = link;
+      } else {
+        downloadLink = URL.createObjectURL(file);
+      }
+
+      appCard.innerHTML = `
+        <h3>${name}</h3>
+        <p>${desc}</p>
+        <a href="${downloadLink}" download>تحميل</a>
+      `;
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "حذف";
+      deleteBtn.className = "delete-btn";
+      deleteBtn.onclick = () => {
+        if (confirm("هل أنت متأكد أنك تريد حذف هذا التطبيق؟")) {
+          appCard.remove();
+        }
+      };
+
+      appCard.appendChild(deleteBtn);
+      appsContainer.appendChild(appCard);
+      uploadForm.classList.add("hidden");
+
+      document.getElementById("appName").value = "";
+      document.getElementById("appDesc").value = "";
+      document.getElementById("appLink").value = "";
+      document.getElementById("appFile").value = "";
+    }
+
+    searchInput.addEventListener("input", () => {
+      const query = searchInput.value.toLowerCase();
+      const cards = document.querySelectorAll(".app-card");
+
+      cards.forEach(card => {
+        const title = card.querySelector("h3").textContent.toLowerCase();
+        card.style.display = title.includes(query) ? "block" : "none";
+      });
+    });
+  </script>
+
+</body>
+</html>
